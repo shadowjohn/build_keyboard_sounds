@@ -19,6 +19,7 @@
             /* Neon Glows */
             --color-balanced: #eab308;
             --color-csharp: #14b8a6;
+            --color-nostalgia: #ec4899;
             --color-classic: #3b82f6;
             --color-soft: #a855f7;
             --color-crisp: #06b6d4;
@@ -140,6 +141,7 @@
         /* Card presets colors */
         .preset-card.balanced::before { background: var(--color-balanced); }
         .preset-card.csharp::before { background: var(--color-csharp); }
+        .preset-card.nostalgia::before { background: var(--color-nostalgia); }
         .preset-card.classic::before { background: var(--color-classic); }
         .preset-card.soft::before { background: var(--color-soft); }
         .preset-card.crisp::before { background: var(--color-crisp); }
@@ -153,6 +155,7 @@
 
         .preset-card.balanced:hover { box-shadow: 0 10px 25px -10px rgba(234, 179, 8, 0.12); }
         .preset-card.csharp:hover { box-shadow: 0 10px 25px -10px rgba(20, 184, 166, 0.12); }
+        .preset-card.nostalgia:hover { box-shadow: 0 10px 25px -10px rgba(236, 72, 153, 0.12); }
         .preset-card.classic:hover { box-shadow: 0 10px 25px -10px rgba(59, 130, 246, 0.12); }
         .preset-card.soft:hover { box-shadow: 0 10px 25px -10px rgba(168, 85, 247, 0.12); }
         .preset-card.crisp:hover { box-shadow: 0 10px 25px -10px rgba(6, 182, 212, 0.12); }
@@ -182,6 +185,7 @@
 
         .balanced .card-badge { color: var(--color-balanced); }
         .csharp .card-badge { color: var(--color-csharp); }
+        .nostalgia .card-badge { color: var(--color-nostalgia); }
         .classic .card-badge { color: var(--color-classic); }
         .soft .card-badge { color: var(--color-soft); }
         .crisp .card-badge { color: var(--color-crisp); }
@@ -217,6 +221,7 @@
         
         .balanced .specs-list li::before { color: var(--color-balanced); }
         .csharp .specs-list li::before { color: var(--color-csharp); }
+        .nostalgia .specs-list li::before { color: var(--color-nostalgia); }
         .classic .specs-list li::before { color: var(--color-classic); }
         .soft .specs-list li::before { color: var(--color-soft); }
         .crisp .specs-list li::before { color: var(--color-crisp); }
@@ -249,6 +254,7 @@
 
         .balanced .play-btn { background: var(--color-balanced); }
         .csharp .play-btn { background: var(--color-csharp); }
+        .nostalgia .play-btn { background: var(--color-nostalgia); }
         .classic .play-btn { background: var(--color-classic); }
         .soft .play-btn { background: var(--color-soft); }
         .crisp .play-btn { background: var(--color-crisp); }
@@ -589,7 +595,7 @@
     <div class="container">
         <header>
             <h1>機械鍵盤聲音樣版混音展示面板</h1>
-            <p>聽聽純合成鍵盤音效：透過數位訊號處理生成 7 種不同取向的打字聲。</p>
+            <p>聽聽純合成鍵盤音效：透過數位訊號處理生成 8 種不同取向的打字聲。</p>
         </header>
 
         <div class="dashboard-layout">
@@ -714,7 +720,7 @@
                                 <span class="card-title">5. Crisp 極致清脆</span>
                                 <span class="card-badge">Box 白軸</span>
                             </div>
-                            <p class="card-desc">施加高通差分濾波並大幅提升音高 15%，極端放大擊鍵瞬間的亮麗質感。猶如 Kailh 白軸般輕快乾脆。</p>
+                            <p class="card-desc">施加高通差分濾波並大幅提升音高 15%，極端放大擊鍵瞬間的亮麗質感。猶如清脆段落白軸般輕快乾脆。</p>
                             <ul class="specs-list">
                                 <li>差分銳化：高通差分增強，剔除濁音</li>
                                 <li>播放速度：升調 15% (1.15x 播放)，極致清脆</li>
@@ -745,7 +751,7 @@
                             <ul class="specs-list">
                                 <li>卡榫模擬：精密 Click 卡榫雙重聲 (下壓+回彈)</li>
                                 <li>音調調整：升調 5% (1.05x)，音色高亮乾淨</li>
-                                <li>聲音質感：極其神似真實 Cherry 青軸</li>
+                                <li>聲音質感：極其神似真實段落青軸</li>
                             </ul>
                         </div>
                         <div class="play-row">
@@ -788,6 +794,33 @@
                         </div>
                     </div>
 
+                    <!-- NOSTALGIA Card -->
+                    <div class="preset-card nostalgia" id="card-nostalgia">
+                        <div>
+                            <div class="card-header">
+                                <span class="card-title">8. Nostalgia 復古通訊</span>
+                                <span class="card-badge">電子懷舊</span>
+                            </div>
+                            <p class="card-desc">用較長尾韻、明亮電子 tick 與柔和大鍵回饋，重塑早期通訊軟體常見的輕巧打字手感。</p>
+                            <ul class="specs-list">
+                                <li>時序特色：一般鍵 97-199ms，保留長短跳動感</li>
+                                <li>Enter鍵：485ms 長尾回響，厚度更收斂</li>
+                                <li>退格刪除：柔和下滑掃過，不做尖銳爆裂</li>
+                            </ul>
+                        </div>
+                        <div class="play-row">
+                            <button class="play-btn" onclick="togglePlayAll('nostalgia')" title="循序播放所有聲音">
+                                <svg viewBox="0 0 24 24" id="play-icon-nostalgia">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </button>
+                            <div class="status-box">
+                                <span class="status-label">WAV 展示播放</span>
+                                <span class="status-value" id="status-nostalgia">閒置中</span>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -825,9 +858,10 @@
                             <span class="preset-select-label">打字音源：</span>
                             <select class="preset-select" id="sim-preset-select" onchange="changeActivePreset(this.value)" style="border-color: var(--color-custom);">
                                 <option value="custom">🛠️ 自定義混音組合 (Custom Mix)</option>
+                                <option value="nostalgia">8. Nostalgia 復古通訊</option>
                                 <option value="retro">7. Retro 復古打字機</option>
                                 <option value="blue">6. Blue 機械青軸</option>
-                                <option value="crisp">5. Crisp 極致清脆 Kailh白</option>
+                                <option value="crisp">5. Crisp 極致清脆白軸</option>
                                 <option value="soft">4. Soft 柔和靜音 Thock</option>
                                 <option value="classic">3. Classic 經典瞬態增強</option>
                                 <option value="csharp">2. CSharp 柔順復刻</option>
@@ -942,9 +976,9 @@
             'space.wav': '空白鍵 Space', 'delete.wav': '刪除鍵 Delete', 'backspace.wav': '退格鍵 Backspace', 'enter.wav': '回車鍵 Enter'
         };
 
-        const presets = ['balanced', 'csharp', 'classic', 'soft', 'crisp', 'blue', 'retro'];
+        const presets = ['balanced', 'csharp', 'classic', 'soft', 'crisp', 'blue', 'retro', 'nostalgia'];
         const presetChineseNames = {
-            'balanced': '均衡', 'csharp': 'CSharp', 'classic': '經典', 'soft': '柔和', 'crisp': '清脆', 'blue': '青軸', 'retro': '復古'
+            'balanced': '均衡', 'csharp': 'CSharp', 'classic': '經典', 'soft': '柔和', 'crisp': '清脆', 'blue': '青軸', 'retro': '復古', 'nostalgia': '懷舊'
         };
 
         // Global Custom Mix state (Default values)
@@ -1100,7 +1134,7 @@
             const colors = {
                 balanced: 'var(--color-balanced)', csharp: 'var(--color-csharp)', classic: 'var(--color-classic)',
                 soft: 'var(--color-soft)', crisp: 'var(--color-crisp)',
-                blue: 'var(--color-blue)', retro: 'var(--color-retro)'
+                blue: 'var(--color-blue)', retro: 'var(--color-retro)', nostalgia: 'var(--color-nostalgia)'
             };
             document.getElementById(`card-${preset}`).style.borderColor = colors[preset];
             document.getElementById(`play-icon-${preset}`).innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
