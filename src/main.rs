@@ -22,6 +22,7 @@ enum Preset {
     Blue,
     Balanced,
     Retro,
+    CSharp,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -78,6 +79,7 @@ fn run() -> io::Result<()> {
                 (Preset::Blue, "blue"),
                 (Preset::Retro, "retro"),
                 (Preset::Balanced, "balanced"),
+                (Preset::CSharp, "csharp"),
             ];
             for &(preset, dir_name) in &presets {
                 let preset_dir = options.out_dir.join(dir_name);
@@ -209,8 +211,9 @@ impl Preset {
             "blue" | "mx-blue" | "cherry-blue" | "青軸" => Ok(Self::Blue),
             "balanced" => Ok(Self::Balanced),
             "retro" | "typewriter" => Ok(Self::Retro),
+            "csharp" | "cs" => Ok(Self::CSharp),
             _ => Err(invalid(format!(
-                "unknown preset: {value}; expected soft, classic, crisp, blue, balanced, or retro"
+                "unknown preset: {value}; expected soft, classic, crisp, blue, balanced, retro, or csharp"
             ))),
         }
     }
@@ -350,6 +353,10 @@ fn specs_for_preset(preset: Preset) -> Vec<SoundSpec> {
         apply_balanced_shape(&mut specs);
         return specs;
     }
+    if preset == Preset::CSharp {
+        apply_csharp_shape(&mut specs);
+        return specs;
+    }
     if preset == Preset::Blue {
         apply_blue_switch_shape(&mut specs);
         return specs;
@@ -366,6 +373,7 @@ fn specs_for_preset(preset: Preset) -> Vec<SoundSpec> {
         Preset::Blue => unreachable!(),
         Preset::Balanced => unreachable!(),
         Preset::Retro => unreachable!(),
+        Preset::CSharp => unreachable!(),
     };
 
     for spec in &mut specs {
@@ -518,6 +526,52 @@ fn apply_balanced_shape(specs: &mut [SoundSpec]) {
     }
 }
 
+fn apply_csharp_shape(specs: &mut [SoundSpec]) {
+    for spec in specs {
+        match spec.file_name {
+            "0.wav" => tune_reference_key(spec, 43, 1_280.0, 0.76, 0.44, 0.90),
+            "1.wav" => tune_reference_key(spec, 197, 1_260.0, 0.58, 0.46, 0.84),
+            "2.wav" => tune_reference_key(spec, 139, 1_340.0, 0.68, 0.42, 0.88),
+            "3.wav" => tune_reference_key(spec, 156, 1_120.0, 0.58, 0.46, 0.78),
+            "4.wav" => tune_reference_key(spec, 111, 1_430.0, 0.74, 0.38, 0.94),
+            "5.wav" => tune_reference_key(spec, 199, 1_520.0, 0.54, 0.44, 0.82),
+            "6.wav" => tune_reference_key(spec, 134, 1_760.0, 0.78, 0.36, 1.02),
+            "7.wav" => tune_reference_key(spec, 137, 1_480.0, 0.62, 0.38, 0.86),
+            "8.wav" => tune_reference_key(spec, 172, 1_210.0, 0.58, 0.44, 0.80),
+            "9.wav" => tune_reference_key(spec, 97, 1_690.0, 0.82, 0.34, 1.06),
+            "enter.wav" => {
+                spec.duration_ms = 118;
+                spec.base_hz = 310.0;
+                spec.noise = 0.72;
+                spec.body = 0.88;
+                spec.brightness = 0.72;
+            }
+            "delete.wav" => {
+                spec.duration_ms = 175;
+                spec.base_hz = 980.0;
+                spec.noise = 0.70;
+                spec.body = 0.34;
+                spec.brightness = 0.88;
+            }
+            "backspace.wav" => {
+                spec.duration_ms = 175;
+                spec.base_hz = 640.0;
+                spec.noise = 0.36;
+                spec.body = 0.54;
+                spec.brightness = 0.86;
+            }
+            "space.wav" => {
+                spec.duration_ms = 168;
+                spec.base_hz = 390.0;
+                spec.noise = 0.58;
+                spec.body = 0.82;
+                spec.brightness = 0.54;
+            }
+            _ => {}
+        }
+    }
+}
+
 fn tune_reference_key(
     spec: &mut SoundSpec,
     duration_ms: u32,
@@ -555,6 +609,7 @@ fn build_traced_wav_bytes(
     );
     let speed = match preset {
         Preset::Balanced => 1.015,
+        Preset::CSharp => 1.012,
         Preset::Soft => 0.90,
         Preset::Crisp => 1.15,
         Preset::Blue => 1.05,
@@ -600,7 +655,7 @@ fn process_reference_samples(
     seed: u32,
 ) -> Vec<f32> {
     match preset {
-        Preset::Balanced => {
+        Preset::Balanced | Preset::CSharp => {
             let mut processed = vec![0.0; samples.len()];
             if !samples.is_empty() {
                 processed[0] = samples[0];
@@ -1308,7 +1363,7 @@ fn invalid(message: impl Into<String>) -> io::Error {
 
 fn print_usage() {
     println!(
-        "Usage: build_keyboard_sounds [--out wavs] [--preset soft|classic|crisp|blue|balanced|retro] [--volume 0.82] [--sample-rate 44100] [--trace-from your_own_wavs]"
+        "Usage: build_keyboard_sounds [--out wavs] [--preset soft|classic|crisp|blue|balanced|retro|csharp] [--volume 0.82] [--sample-rate 44100] [--trace-from your_own_wavs]"
     );
 }
 
@@ -1476,6 +1531,51 @@ mod tests {
         let options = parse_args(["--preset".to_string(), "balanced".to_string()]).unwrap();
 
         assert_eq!(options.preset, PresetOption::Single(Preset::Balanced));
+    }
+
+    #[test]
+    fn parse_args_rejects_legacy_brand_aliases() {
+        let legacy_app_name = ["ucl", "liu"].concat();
+        let legacy_messenger_name = String::from_utf8(vec![105, 99, 113]).unwrap();
+
+        assert!(parse_args(["--preset".to_string(), legacy_app_name]).is_err());
+        assert!(parse_args(["--preset".to_string(), legacy_messenger_name]).is_err());
+    }
+
+    #[test]
+    fn parse_args_accepts_csharp_preset() {
+        let options = parse_args(["--preset".to_string(), "csharp".to_string()]).unwrap();
+
+        assert_eq!(options.preset, PresetOption::Single(Preset::CSharp));
+    }
+
+    #[test]
+    fn csharp_preset_matches_recovered_generator_timing_shape() {
+        let specs = specs_for_preset(Preset::CSharp);
+        let durations: Vec<(&str, u32)> = specs
+            .iter()
+            .map(|spec| (spec.file_name, spec.duration_ms))
+            .collect();
+
+        assert_eq!(
+            durations,
+            vec![
+                ("0.wav", 43),
+                ("1.wav", 197),
+                ("2.wav", 139),
+                ("3.wav", 156),
+                ("4.wav", 111),
+                ("5.wav", 199),
+                ("6.wav", 134),
+                ("7.wav", 137),
+                ("8.wav", 172),
+                ("9.wav", 97),
+                ("enter.wav", 118),
+                ("delete.wav", 175),
+                ("backspace.wav", 175),
+                ("space.wav", 168),
+            ]
+        );
     }
 
     #[test]

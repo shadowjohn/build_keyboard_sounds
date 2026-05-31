@@ -18,6 +18,7 @@
             
             /* Neon Glows */
             --color-balanced: #eab308;
+            --color-csharp: #14b8a6;
             --color-classic: #3b82f6;
             --color-soft: #a855f7;
             --color-crisp: #06b6d4;
@@ -138,6 +139,7 @@
 
         /* Card presets colors */
         .preset-card.balanced::before { background: var(--color-balanced); }
+        .preset-card.csharp::before { background: var(--color-csharp); }
         .preset-card.classic::before { background: var(--color-classic); }
         .preset-card.soft::before { background: var(--color-soft); }
         .preset-card.crisp::before { background: var(--color-crisp); }
@@ -150,6 +152,7 @@
         }
 
         .preset-card.balanced:hover { box-shadow: 0 10px 25px -10px rgba(234, 179, 8, 0.12); }
+        .preset-card.csharp:hover { box-shadow: 0 10px 25px -10px rgba(20, 184, 166, 0.12); }
         .preset-card.classic:hover { box-shadow: 0 10px 25px -10px rgba(59, 130, 246, 0.12); }
         .preset-card.soft:hover { box-shadow: 0 10px 25px -10px rgba(168, 85, 247, 0.12); }
         .preset-card.crisp:hover { box-shadow: 0 10px 25px -10px rgba(6, 182, 212, 0.12); }
@@ -178,6 +181,7 @@
         }
 
         .balanced .card-badge { color: var(--color-balanced); }
+        .csharp .card-badge { color: var(--color-csharp); }
         .classic .card-badge { color: var(--color-classic); }
         .soft .card-badge { color: var(--color-soft); }
         .crisp .card-badge { color: var(--color-crisp); }
@@ -212,6 +216,7 @@
         }
         
         .balanced .specs-list li::before { color: var(--color-balanced); }
+        .csharp .specs-list li::before { color: var(--color-csharp); }
         .classic .specs-list li::before { color: var(--color-classic); }
         .soft .specs-list li::before { color: var(--color-soft); }
         .crisp .specs-list li::before { color: var(--color-crisp); }
@@ -243,6 +248,7 @@
         }
 
         .balanced .play-btn { background: var(--color-balanced); }
+        .csharp .play-btn { background: var(--color-csharp); }
         .classic .play-btn { background: var(--color-classic); }
         .soft .play-btn { background: var(--color-soft); }
         .crisp .play-btn { background: var(--color-crisp); }
@@ -583,7 +589,7 @@
     <div class="container">
         <header>
             <h1>機械鍵盤聲音樣版混音展示面板</h1>
-            <p>聽聽純合成鍵盤音效：透過數位訊號處理生成 6 種不同取向的打字聲。</p>
+            <p>聽聽純合成鍵盤音效：透過數位訊號處理生成 7 種不同取向的打字聲。</p>
         </header>
 
         <div class="dashboard-layout">
@@ -620,11 +626,38 @@
                         </div>
                     </div>
 
+                    <!-- CSHARP Card -->
+                    <div class="preset-card csharp" id="card-csharp">
+                        <div>
+                            <div class="card-header">
+                                <span class="card-title">2. CSharp 柔順復刻</span>
+                                <span class="card-badge">輕柔短鍵</span>
+                            </div>
+                            <p class="card-desc">仿照早期 C# 版產生器的舒服手感，保留長短交錯的一般鍵，Enter 則收斂成短促乾淨的大鍵回饋。</p>
+                            <ul class="specs-list">
+                                <li>時序特色：一般鍵 43-199ms 長短交錯</li>
+                                <li>Enter鍵：短促 118ms，乾淨不拖尾</li>
+                                <li>音色取向：柔順、低刺激、適合長時間輸入</li>
+                            </ul>
+                        </div>
+                        <div class="play-row">
+                            <button class="play-btn" onclick="togglePlayAll('csharp')" title="循序播放所有聲音">
+                                <svg viewBox="0 0 24 24" id="play-icon-csharp">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </button>
+                            <div class="status-box">
+                                <span class="status-label">WAV 展示播放</span>
+                                <span class="status-value" id="status-csharp">閒置中</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- CLASSIC Card -->
                     <div class="preset-card classic" id="card-classic">
                         <div>
                             <div class="card-header">
-                                <span class="card-title">2. Classic 經典</span>
+                                <span class="card-title">3. Classic 經典</span>
                                 <span class="card-badge">瞬態增強</span>
                             </div>
                             <p class="card-desc">施加輕微的高頻邊緣瞬態補償，讓擊鍵聲輪廓更立體，呈現經典耐聽的擊鍵質感。</p>
@@ -651,7 +684,7 @@
                     <div class="preset-card soft" id="card-soft">
                         <div>
                             <div class="card-header">
-                                <span class="card-title">3. Soft 柔和靜音</span>
+                                <span class="card-title">4. Soft 柔和靜音</span>
                                 <span class="card-badge">低沈 Thock</span>
                             </div>
                             <p class="card-desc">採用強力 7 點滑動平均低通濾波，並將音高調低 10%，濾除一切刺耳 tick 聲，呈現圓潤厚實的 Thock 靜音軸感。</p>
@@ -678,7 +711,7 @@
                     <div class="preset-card crisp" id="card-crisp">
                         <div>
                             <div class="card-header">
-                                <span class="card-title">4. Crisp 極致清脆</span>
+                                <span class="card-title">5. Crisp 極致清脆</span>
                                 <span class="card-badge">Box 白軸</span>
                             </div>
                             <p class="card-desc">施加高通差分濾波並大幅提升音高 15%，極端放大擊鍵瞬間的亮麗質感。猶如 Kailh 白軸般輕快乾脆。</p>
@@ -705,7 +738,7 @@
                     <div class="preset-card blue" id="card-blue">
                         <div>
                             <div class="card-header">
-                                <span class="card-title">5. Blue 機械青軸</span>
+                                <span class="card-title">6. Blue 機械青軸</span>
                                 <span class="card-badge">Click 雙重奏</span>
                             </div>
                             <p class="card-desc">在起音與回彈處融合極清脆的 Click 卡擊聲與金屬彈簧餘音，高度模擬段落青軸。</p>
@@ -732,7 +765,7 @@
                     <div class="preset-card retro" id="card-retro">
                         <div>
                             <div class="card-header">
-                                <span class="card-title">6. Retro 復古打字機</span>
+                                <span class="card-title">7. Retro 復古打字機</span>
                                 <span class="card-badge">復古掃擊</span>
                             </div>
                             <p class="card-desc">鍵擊聲呈現厚重金屬錘 clack。退格改為下滑掃擊音，Enter 則融入打字機金屬鈴聲「叮！」</p>
@@ -792,11 +825,12 @@
                             <span class="preset-select-label">打字音源：</span>
                             <select class="preset-select" id="sim-preset-select" onchange="changeActivePreset(this.value)" style="border-color: var(--color-custom);">
                                 <option value="custom">🛠️ 自定義混音組合 (Custom Mix)</option>
-                                <option value="retro">6. Retro 復古打字機</option>
-                                <option value="blue">5. Blue 機械青軸</option>
-                                <option value="soft">3. Soft 柔和靜音 Thock</option>
-                                <option value="crisp">4. Crisp 極致清脆 Kailh白</option>
-                                <option value="classic">2. Classic 經典瞬態增強</option>
+                                <option value="retro">7. Retro 復古打字機</option>
+                                <option value="blue">6. Blue 機械青軸</option>
+                                <option value="crisp">5. Crisp 極致清脆 Kailh白</option>
+                                <option value="soft">4. Soft 柔和靜音 Thock</option>
+                                <option value="classic">3. Classic 經典瞬態增強</option>
+                                <option value="csharp">2. CSharp 柔順復刻</option>
                                 <option value="balanced">1. Balanced 均衡經典</option>
                             </select>
                         </div>
@@ -908,9 +942,9 @@
             'space.wav': '空白鍵 Space', 'delete.wav': '刪除鍵 Delete', 'backspace.wav': '退格鍵 Backspace', 'enter.wav': '回車鍵 Enter'
         };
 
-        const presets = ['balanced', 'classic', 'soft', 'crisp', 'blue', 'retro'];
+        const presets = ['balanced', 'csharp', 'classic', 'soft', 'crisp', 'blue', 'retro'];
         const presetChineseNames = {
-            'balanced': '均衡', 'classic': '經典', 'soft': '柔和', 'crisp': '清脆', 'blue': '青軸', 'retro': '復古'
+            'balanced': '均衡', 'csharp': 'CSharp', 'classic': '經典', 'soft': '柔和', 'crisp': '清脆', 'blue': '青軸', 'retro': '復古'
         };
 
         // Global Custom Mix state (Default values)
@@ -1064,7 +1098,7 @@
             currentPlayIndex = 0;
             
             const colors = {
-                balanced: 'var(--color-balanced)', classic: 'var(--color-classic)',
+                balanced: 'var(--color-balanced)', csharp: 'var(--color-csharp)', classic: 'var(--color-classic)',
                 soft: 'var(--color-soft)', crisp: 'var(--color-crisp)',
                 blue: 'var(--color-blue)', retro: 'var(--color-retro)'
             };
