@@ -1,0 +1,38 @@
+name: Build & Deploy Keyboard Sounds to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust Toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Generate All Keyboard Sounds
+        env:
+          RUSTFLAGS: ""
+        run: |
+          cargo run --release -- --preset all --volume 82
+
+      - name: Prepare Deployment Artifacts
+        run: |
+          mkdir -p dist
+          cp index.html dist/
+          cp -r wavs dist/
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist
+          branch: gh-pages

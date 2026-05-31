@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>機械鍵盤聲音樣版混音與展示面板</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0c0e17;
+            --card-bg: rgba(20, 26, 45, 0.45);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-color: #f3f4f6;
+            --text-muted: #9ca3af;
+            
+            /* Neon Glows */
+            --color-balanced: #eab308;
+            --color-classic: #3b82f6;
+            --color-soft: #a855f7;
+            --color-crisp: #06b6d4;
+            --color-blue: #ef4444;
+            --color-retro: #f97316;
+            --color-custom: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 1.5rem;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 5% 15%, rgba(59, 130, 246, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 95% 85%, rgba(168, 85, 247, 0.04) 0%, transparent 40%);
+        }
+
+        .container {
+            max-width: 1560px;
+            margin: 0 auto;
+        }
+
+        /* Header styling */
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 2.6rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 30%, var(--text-muted) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            max-width: 800px;
+            margin: 0 auto;
+            font-weight: 300;
+        }
+
+        /* Horizontal Split Layout Dashboard */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Left Side: Showcase Grid */
+        .showcase-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .column-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .presets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.2rem;
+        }
+
+        /* Card glassmorphism */
+        .preset-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 1.5rem;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .preset-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+        }
+
+        /* Card presets colors */
+        .preset-card.balanced::before { background: var(--color-balanced); }
+        .preset-card.classic::before { background: var(--color-classic); }
+        .preset-card.soft::before { background: var(--color-soft); }
+        .preset-card.crisp::before { background: var(--color-crisp); }
+        .preset-card.blue::before { background: var(--color-blue); }
+        .preset-card.retro::before { background: var(--color-retro); }
+
+        .preset-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .preset-card.balanced:hover { box-shadow: 0 10px 25px -10px rgba(234, 179, 8, 0.12); }
+        .preset-card.classic:hover { box-shadow: 0 10px 25px -10px rgba(59, 130, 246, 0.12); }
+        .preset-card.soft:hover { box-shadow: 0 10px 25px -10px rgba(168, 85, 247, 0.12); }
+        .preset-card.crisp:hover { box-shadow: 0 10px 25px -10px rgba(6, 182, 212, 0.12); }
+        .preset-card.blue:hover { box-shadow: 0 10px 25px -10px rgba(239, 68, 68, 0.12); }
+        .preset-card.retro:hover { box-shadow: 0 10px 25px -10px rgba(249, 115, 22, 0.12); }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .card-badge {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            padding: 0.2rem 0.6rem;
+            border-radius: 8px;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .balanced .card-badge { color: var(--color-balanced); }
+        .classic .card-badge { color: var(--color-classic); }
+        .soft .card-badge { color: var(--color-soft); }
+        .crisp .card-badge { color: var(--color-crisp); }
+        .blue .card-badge { color: var(--color-blue); }
+        .retro .card-badge { color: var(--color-retro); }
+
+        .card-desc {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            line-height: 1.4;
+            margin-bottom: 1.2rem;
+            font-weight: 300;
+        }
+
+        .specs-list {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .specs-list li {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .specs-list li::before {
+            content: "•";
+            margin-right: 0.4rem;
+            font-size: 1rem;
+        }
+        
+        .balanced .specs-list li::before { color: var(--color-balanced); }
+        .classic .specs-list li::before { color: var(--color-classic); }
+        .soft .specs-list li::before { color: var(--color-soft); }
+        .crisp .specs-list li::before { color: var(--color-crisp); }
+        .blue .specs-list li::before { color: var(--color-blue); }
+        .retro .specs-list li::before { color: var(--color-retro); }
+
+        .play-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            padding: 0.6rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+        }
+
+        .play-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            transition: all 0.25s ease;
+        }
+
+        .balanced .play-btn { background: var(--color-balanced); }
+        .classic .play-btn { background: var(--color-classic); }
+        .soft .play-btn { background: var(--color-soft); }
+        .crisp .play-btn { background: var(--color-crisp); }
+        .blue .play-btn { background: var(--color-blue); }
+        .retro .play-btn { background: var(--color-retro); }
+
+        .play-btn:hover {
+            transform: scale(1.06);
+        }
+
+        .play-btn svg {
+            width: 14px;
+            height: 14px;
+            fill: #000;
+        }
+
+        .soft .play-btn svg, .retro .play-btn svg, .blue .play-btn svg, .classic .play-btn svg {
+            fill: #fff;
+        }
+
+        .status-box {
+            flex-grow: 1;
+            margin-left: 0.8rem;
+            font-size: 0.8rem;
+            overflow: hidden;
+        }
+
+        .status-label {
+            font-weight: 600;
+            display: block;
+        }
+
+        .status-value {
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+        }
+
+        /* Right Side Panels */
+        .workspace-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Mixer Panel glassmorphism */
+        .mixer-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 1.8rem;
+        }
+
+        .mixer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .pack-download-btn {
+            background: var(--color-custom);
+            border: none;
+            color: #000;
+            padding: 0.5rem 1.2rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .pack-download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .zip-status {
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 0.8rem;
+        }
+
+        .mixer-table-container {
+            max-height: 380px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            padding: 0.5rem;
+        }
+
+        .mixer-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.6rem;
+        }
+
+        @media (max-width: 600px) {
+            .mixer-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .mixer-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            padding: 0.4rem 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+        }
+
+        .mixer-key-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            font-family: monospace;
+            width: 100px;
+        }
+
+        .mixer-select {
+            background: rgba(0, 0, 0, 0.4);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            width: 90px;
+        }
+
+        .mixer-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .mixer-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        .mixer-btn svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
+        .mixer-dl-link {
+            color: var(--color-crisp);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .mixer-dl-link:hover {
+            background: rgba(6, 182, 212, 0.1);
+            transform: scale(1.1);
+        }
+
+        .mixer-dl-link svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
+        /* Simulator Section glassmorphism */
+        .simulator-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 1.8rem;
+        }
+
+        .sim-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .sim-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .preset-select-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .preset-select-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .preset-select {
+            background: rgba(0, 0, 0, 0.4);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 0.4rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .preset-select:focus {
+            border-color: var(--color-custom);
+        }
+
+        .typing-input {
+            width: 100%;
+            height: 90px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 0.8rem 1rem;
+            font-size: 1rem;
+            color: #fff;
+            resize: none;
+            outline: none;
+            font-family: inherit;
+            margin-bottom: 1rem;
+        }
+
+        .sim-action-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: var(--text-color);
+            padding: 0.45rem 1rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .sim-action-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Virtual Keyboard */
+        .keyboard {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.02);
+            padding: 0.8rem;
+            border-radius: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .keyboard-row {
+            display: flex;
+            gap: 0.35rem;
+            justify-content: center;
+        }
+
+        .key {
+            background: #191c28;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-bottom: 2.5px solid #0a0b10;
+            border-radius: 6px;
+            height: 38px;
+            min-width: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #8b92a5;
+            cursor: pointer;
+            transition: all 0.05s ease;
+            user-select: none;
+        }
+
+        .key.active {
+            background: rgba(255, 255, 255, 0.95) !important;
+            border-bottom-width: 1px;
+            transform: translateY(1.5px);
+            color: #000 !important;
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
+        }
+
+        .key-backspace { width: 62px; }
+        .key-tab { width: 52px; }
+        .key-caps { width: 60px; }
+        .key-enter { width: 70px; }
+        .key-shift-l { width: 80px; }
+        .key-shift-r { width: 88px; }
+        .key-space { width: 220px; }
+        .key-ctrl { width: 48px; }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.2rem; }
+            .presets-grid { grid-template-columns: 1fr; }
+            .keyboard { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>機械鍵盤聲音樣版混音展示面板</h1>
+            <p>聽聽純合成鍵盤音效：透過數位訊號處理生成 6 種不同取向的打字聲。</p>
+        </header>
+
+        <div class="dashboard-layout">
+            
+            <!-- Left Panel: Sound Showcase -->
+            <div class="showcase-column">
+                <span class="column-title">✨ 音效套件快捷展示庫</span>
+                <div class="presets-grid">
+                    
+                    <!-- BALANCED Card -->
+                    <div class="preset-card balanced" id="card-balanced">
+                        <div>
+                            <div class="card-header">
+                                <span class="card-title">1. Balanced 均衡經典</span>
+                                <span class="card-badge">純合成</span>
+                            </div>
+                            <p class="card-desc">以較長尾韻與穩定大鍵回饋為核心，保留傳統打字音的清楚輪廓。</p>
+                            <ul class="specs-list">
+                                <li>調校音色：均衡擊鍵敲擊質感</li>
+                                <li>大鍵特色：穩重紮實的大鍵回饋</li>
+                                <li>Backspace：純淨紮實的退格敲擊</li>
+                            </ul>
+                        </div>
+                        <div class="play-row">
+                            <button class="play-btn" onclick="togglePlayAll('balanced')" title="循序播放所有聲音">
+                                <svg viewBox="0 0 24 24" id="play-icon-balanced">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </button>
+                            <div class="status-box">
+                                <span class="status-label">WAV 展示播放</span>
+                                <span class="status-value" id="status-balanced">閒置中</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CLASSIC Card -->
+                    <div class="preset-card classic" id="card-classic">
+                        <div>
+                            <div class="card-header">
+                                <span class="card-title">2. Classic 經典</span>
+                                <span class="card-badge">瞬態增強</span>
+                            </div>
+                            <p class="card-desc">施加輕微的高頻邊緣瞬態補償，讓擊鍵聲輪廓更立體，呈現經典耐聽的擊鍵質感。</p>
+                            <ul class="specs-list">
+                                <li>高頻調校：+0.25 輕度瞬態邊緣增強</li>
+                                <li>播放速度：原速 (1.00x) 均衡平穩</li>
+                                <li>音色特點：清晰立體、耐聽不刺耳</li>
+                            </ul>
+                        </div>
+                        <div class="play-row">
+                            <button class="play-btn" onclick="togglePlayAll('classic')" title="循序播放所有聲音">
+                                <svg viewBox="0 0 24 24" id="play-icon-classic">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </button>
+                            <div class="status-box">
+                                <span class="status-label">WAV 展示播放</span>
+                                <span class="status-value" id="status-classic">閒置中</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SOFT Card -->
+                    <div class="preset-card soft" id="card-soft">
+                        <div>
+                            <div class="card-header">
+                                <span class="card-title">3. Soft 柔和靜音</span>
+                                <span class="card-badge">低沈 Thock</span>
+                            </div>
+                            <p class="card-desc">採用強力 7 點滑動平均低通濾波，並將音高調低 10%，濾除一切刺耳 tick 聲，呈現圓潤厚實的 Thock 靜音軸感。</p>
+                            <ul class="specs-list">
+                                <li>濾波技術：強力 7-tap 低通，消除高頻雜訊</li>
+                                <li>速度音調：降調 10% (0.90x 播放)，極度低沉</li>
+                                <li>適合場景：喜愛 Thock 聲或深夜打字</li>
+                            </ul>
+                        </div>
+                        <div class="play-row">
+                            <button class="play-btn" onclick="togglePlayAll('soft')" title="循序播放所有聲音">
+                                <svg viewBox="0 0 24 24" id="play-icon-soft">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </button>
+                            <div class="status-box">
+                                <span class="status-label">WAV 展示播放</span>
+                                <span class="status-value" id="status-soft">閒置中</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CRISP Card -->
+                    <div class="preset-card crisp" id="card-crisp">
+                        <div>
+                            <div class="card-header">
+                                <span class="card-title">4. Crisp 極致清脆</span>
+                                <span class="card-badge">Box 白軸</span>
+                            </div>
+                            <p class="card-desc">施加高通差分濾波並大幅提升音高 15%，極端放大擊鍵瞬間的亮麗質感。猶如 Kailh 白軸般輕快乾脆。</p>
+                            <ul class="specs-list">
+                                <li>差分銳化：高通差分增強，剔除濁音</li>
+                                <li>播放速度：升調 15% (1.15x 播放)，極致清脆</li>
+                                <li>音色特點：Click 聲猶如冰塊碎裂般俐落</li>
+                            </ul>
+                        </div>
+                        <div class="play-row">
+                            <button class="play-btn" onclick="togglePlayAll('crisp')" title="循序播放所有聲音">
+                                <svg viewBox="0 0 24 24" id="play-icon-crisp">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </button>
+                            <div class="status-box">
+                                <span class="status-label">WAV 展示播放</span>
+                                <span class="status-value" id="status-crisp">閒置中</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BLUE Card -->
+                    <div class="preset-card blue" id="card-blue">
+                        <div>
+                            <div class="card-header">
+                                <span class="card-title">5. Blue 機械青軸</span>
+                                <span class="card-badge">Click 雙重奏</span>
+                            </div>
+                            <p class="card-desc">在起音與回彈處融合極清脆的 Click 卡擊聲與金屬彈簧餘音，高度模擬段落青軸。</p>
+                            <ul class="specs-list">
+                                <li>卡榫模擬：精密 Click 卡榫雙重聲 (下壓+回彈)</li>
+                                <li>音調調整：升調 5% (1.05x)，音色高亮乾淨</li>
+                                <li>聲音質感：極其神似真實 Cherry 青軸</li>
+                            </ul>
+                        </div>
+                        <div class="play-row">
+                            <button class="play-btn" onclick="togglePlayAll('blue')" title="循序播放所有聲音">
+                                <svg viewBox="0 0 24 24" id="play-icon-blue">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </button>
+                            <div class="status-box">
+                                <span class="status-label">WAV 展示播放</span>
+                                <span class="status-value" id="status-blue">閒置中</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RETRO Card -->
+                    <div class="preset-card retro" id="card-retro">
+                        <div>
+                            <div class="card-header">
+                                <span class="card-title">6. Retro 復古打字機</span>
+                                <span class="card-badge">復古掃擊</span>
+                            </div>
+                            <p class="card-desc">鍵擊聲呈現厚重金屬錘 clack。退格改為下滑掃擊音，Enter 則融入打字機金屬鈴聲「叮！」</p>
+                            <ul class="specs-list">
+                                <li>擊錘模擬：降調 22% (0.78x) 厚重鐵錘敲打 clack</li>
+                                <li>Backspace：下滑掃擊式退格音</li>
+                                <li>Enter鍵：回車瞬間迴盪清脆打字機鈴聲</li>
+                            </ul>
+                        </div>
+                        <div class="play-row">
+                            <button class="play-btn" onclick="togglePlayAll('retro')" title="循序播放所有聲音">
+                                <svg viewBox="0 0 24 24" id="play-icon-retro">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </button>
+                            <div class="status-box">
+                                <span class="status-label">WAV 展示播放</span>
+                                <span class="status-value" id="status-retro">閒置中</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Right Panel: Custom Mixer & Typing Simulator -->
+            <div class="workspace-column">
+                
+                <!-- Custom Mix & Pack section -->
+                <div class="mixer-section">
+                    <div class="mixer-header">
+                        <span class="column-title" style="margin-bottom:0; font-size:1.4rem;">🎛️ 自定義音效混音與打包工具</span>
+                        <div style="display:flex; align-items:center;">
+                            <span class="zip-status" id="zip-status"></span>
+                            <button class="pack-download-btn" onclick="downloadCustomZip()">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                    <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
+                                </svg>
+                                一鍵打包自選 ZIP 音效包
+                            </button>
+                        </div>
+                    </div>
+                    <p class="card-desc" style="margin-bottom:1rem;">自由調配 14 個按鍵所採用的 Preset 來源！自選音色將即時同步到下方的打字模擬器中以供試打。</p>
+                    
+                    <div class="mixer-table-container">
+                        <div class="mixer-grid" id="mixer-grid">
+                            <!-- JS will dynamically populate rows here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Keyboard Simulator Section -->
+                <div class="simulator-section">
+                    <div class="sim-header">
+                        <span class="sim-title">⌨️ 實時互動式打字模擬器</span>
+                        <div class="preset-select-wrapper">
+                            <span class="preset-select-label">打字音源：</span>
+                            <select class="preset-select" id="sim-preset-select" onchange="changeActivePreset(this.value)" style="border-color: var(--color-custom);">
+                                <option value="custom">🛠️ 自定義混音組合 (Custom Mix)</option>
+                                <option value="retro">6. Retro 復古打字機</option>
+                                <option value="blue">5. Blue 機械青軸</option>
+                                <option value="soft">3. Soft 柔和靜音 Thock</option>
+                                <option value="crisp">4. Crisp 極致清脆 Kailh白</option>
+                                <option value="classic">2. Classic 經典瞬態增強</option>
+                                <option value="balanced">1. Balanced 均衡經典</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="typing-area-container" style="margin-bottom:1.5rem;">
+                        <textarea class="typing-input" id="typing-textarea" placeholder="點擊此處並開始打字，即可實時體驗專屬調製音效..." onkeydown="handleKeyDown(event)" onkeyup="handleKeyUp(event)"></textarea>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:-0.5rem; margin-bottom:1.2rem;">
+                        <span style="font-size:0.8rem; color:var(--text-muted);">💡 點擊下方虛擬按鍵也發聲 (實時同步打字音源)</span>
+                        <button class="sim-action-btn" onclick="runGhostTypingDemo()">▶️ 自動打字體驗 demo</button>
+                    </div>
+
+                    <!-- Virtual Keyboard -->
+                    <div class="keyboard">
+                        <!-- Row 1 -->
+                        <div class="keyboard-row">
+                            <div class="key" id="key-Backquote">~</div>
+                            <div class="key" id="key-Digit1">1</div>
+                            <div class="key" id="key-Digit2">2</div>
+                            <div class="key" id="key-Digit3">3</div>
+                            <div class="key" id="key-Digit4">4</div>
+                            <div class="key" id="key-Digit5">5</div>
+                            <div class="key" id="key-Digit6">6</div>
+                            <div class="key" id="key-Digit7">7</div>
+                            <div class="key" id="key-Digit8">8</div>
+                            <div class="key" id="key-Digit9">9</div>
+                            <div class="key" id="key-Digit0">0</div>
+                            <div class="key" id="key-Minus">-</div>
+                            <div class="key" id="key-Equal">=</div>
+                            <div class="key key-backspace" id="key-Backspace">← Back</div>
+                        </div>
+                        <!-- Row 2 -->
+                        <div class="keyboard-row">
+                            <div class="key key-tab" id="key-Tab">Tab</div>
+                            <div class="key" id="key-KeyQ">Q</div>
+                            <div class="key" id="key-KeyW">W</div>
+                            <div class="key" id="key-KeyE">E</div>
+                            <div class="key" id="key-KeyR">R</div>
+                            <div class="key" id="key-KeyT">T</div>
+                            <div class="key" id="key-KeyY">Y</div>
+                            <div class="key" id="key-KeyU">U</div>
+                            <div class="key" id="key-KeyI">I</div>
+                            <div class="key" id="key-KeyO">O</div>
+                            <div class="key" id="key-KeyP">P</div>
+                            <div class="key" id="key-BracketLeft">[</div>
+                            <div class="key" id="key-BracketRight">]</div>
+                            <div class="key" id="key-Backslash">\</div>
+                        </div>
+                        <!-- Row 3 -->
+                        <div class="keyboard-row">
+                            <div class="key key-caps" id="key-CapsLock">Caps</div>
+                            <div class="key" id="key-KeyA">A</div>
+                            <div class="key" id="key-KeyS">S</div>
+                            <div class="key" id="key-KeyD">D</div>
+                            <div class="key" id="key-KeyF">F</div>
+                            <div class="key" id="key-KeyG">G</div>
+                            <div class="key" id="key-KeyH">H</div>
+                            <div class="key" id="key-KeyJ">J</div>
+                            <div class="key" id="key-KeyK">K</div>
+                            <div class="key" id="key-KeyL">L</div>
+                            <div class="key" id="key-Semicolon">;</div>
+                            <div class="key" id="key-Quote">'</div>
+                            <div class="key key-enter" id="key-Enter">Enter ↵</div>
+                        </div>
+                        <!-- Row 4 -->
+                        <div class="keyboard-row">
+                            <div class="key key-shift-l" id="key-ShiftLeft">Shift</div>
+                            <div class="key" id="key-KeyZ">Z</div>
+                            <div class="key" id="key-KeyX">X</div>
+                            <div class="key" id="key-KeyC">C</div>
+                            <div class="key" id="key-KeyV">V</div>
+                            <div class="key" id="key-KeyB">B</div>
+                            <div class="key" id="key-KeyN">N</div>
+                            <div class="key" id="key-KeyM">M</div>
+                            <div class="key" id="comma">,</div>
+                            <div class="key" id="period">.</div>
+                            <div class="key" id="slash">/</div>
+                            <div class="key key-shift-r" id="key-ShiftRight">Shift</div>
+                        </div>
+                        <!-- Row 5 -->
+                        <div class="keyboard-row">
+                            <div class="key key-ctrl" id="key-ControlLeft">Ctrl</div>
+                            <div class="key" id="key-MetaLeft">Win</div>
+                            <div class="key" id="key-AltLeft">Alt</div>
+                            <div class="key key-space" id="key-Space">Space</div>
+                            <div class="key" id="key-AltRight">Alt</div>
+                            <div class="key" id="key-ControlRight">Ctrl</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const audioFiles = [
+            '0.wav', '1.wav', '2.wav', '3.wav', '4.wav',
+            '5.wav', '6.wav', '7.wav', '8.wav', '9.wav',
+            'space.wav', 'delete.wav', 'backspace.wav', 'enter.wav'
+        ];
+
+        const audioChineseNames = {
+            '0.wav': '一般鍵 0', '1.wav': '一般鍵 1', '2.wav': '一般鍵 2', '3.wav': '一般鍵 3', '4.wav': '一般鍵 4',
+            '5.wav': '一般鍵 5', '6.wav': '一般鍵 6', '7.wav': '一般鍵 7', '8.wav': '一般鍵 8', '9.wav': '一般鍵 9',
+            'space.wav': '空白鍵 Space', 'delete.wav': '刪除鍵 Delete', 'backspace.wav': '退格鍵 Backspace', 'enter.wav': '回車鍵 Enter'
+        };
+
+        const presets = ['balanced', 'classic', 'soft', 'crisp', 'blue', 'retro'];
+        const presetChineseNames = {
+            'balanced': '均衡', 'classic': '經典', 'soft': '柔和', 'crisp': '清脆', 'blue': '青軸', 'retro': '復古'
+        };
+
+        // Global Custom Mix state (Default values)
+        const customMix = {
+            '0.wav': 'blue', '1.wav': 'blue', '2.wav': 'blue', '3.wav': 'blue', '4.wav': 'blue',
+            '5.wav': 'blue', '6.wav': 'blue', '7.wav': 'blue', '8.wav': 'blue', '9.wav': 'blue',
+            'space.wav': 'soft', 'delete.wav': 'crisp', 'backspace.wav': 'retro', 'enter.wav': 'retro'
+        };
+
+        // Global states
+        let activePreset = 'custom';
+        let currentPlaylist = [];
+        let currentPlayIndex = -1;
+        let activeAudio = null;
+        let isPlaylistPlaying = false;
+        let activePresetCard = '';
+
+        // Audio preloader cache
+        const audioCache = {};
+
+        // Preload sound function (returns HTML5 Audio object)
+        function getAudio(preset, fileName) {
+            const cacheKey = `${preset}_${fileName}`;
+            if (!audioCache[cacheKey]) {
+                audioCache[cacheKey] = new Audio(`wavs/${preset}/${fileName}`);
+            }
+            return audioCache[cacheKey];
+        }
+
+        // Initialize Mixer Table Grid
+        function initMixerGrid() {
+            const gridEl = document.getElementById('mixer-grid');
+            gridEl.innerHTML = '';
+
+            audioFiles.forEach(file => {
+                const row = document.createElement('div');
+                row.className = 'mixer-row';
+                
+                const label = document.createElement('span');
+                label.className = 'mixer-key-label';
+                label.innerText = audioChineseNames[file];
+                row.appendChild(label);
+
+                // Preset Select Dropdown
+                const select = document.createElement('select');
+                select.className = 'mixer-select';
+                select.id = `select-${file}`;
+                select.onchange = (e) => updateMixerValue(file, e.target.value);
+
+                presets.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p;
+                    opt.text = presetChineseNames[p];
+                    if (customMix[file] === p) opt.selected = true;
+                    select.appendChild(opt);
+                });
+                row.appendChild(select);
+
+                // Preview Button
+                const previewBtn = document.createElement('button');
+                previewBtn.className = 'mixer-btn';
+                previewBtn.title = "單鍵聲音預覽";
+                previewBtn.onclick = () => playSingleFile(customMix[file], file);
+                previewBtn.innerHTML = `
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                    </svg>
+                `;
+                row.appendChild(previewBtn);
+
+                // CORS-Safe Download Link (updated dynamically)
+                const dlLink = document.createElement('a');
+                dlLink.className = 'mixer-dl-link';
+                dlLink.id = `dl-${file}`;
+                dlLink.title = "直接下載此單鍵WAV檔案";
+                dlLink.innerHTML = `
+                    <svg viewBox="0 0 24 24">
+                        <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
+                    </svg>
+                `;
+                row.appendChild(dlLink);
+
+                gridEl.appendChild(row);
+                updateDownloadLink(file); // Update initial href
+            });
+        }
+
+        // Update Mixer value in state
+        function updateMixerValue(file, preset) {
+            customMix[file] = preset;
+            updateDownloadLink(file);
+            playSingleFile(preset, file); // Preview sound instantly!
+        }
+
+        // Update standard download link to point to chosen preset file (CORS-safe)
+        function updateDownloadLink(file) {
+            const preset = customMix[file];
+            const dl = document.getElementById(`dl-${file}`);
+            if (dl) {
+                dl.href = `wavs/${preset}/${file}`;
+                dl.download = file;
+            }
+        }
+
+        // Play individual sound
+        function playSingleFile(preset, file) {
+            const audio = getAudio(preset, file);
+            audio.currentTime = 0;
+            audio.play().catch(e => console.log(e));
+        }
+
+        // Handle Change Preset in simulator
+        function changeActivePreset(preset) {
+            activePreset = preset;
+            stopCurrentAudio();
+            isPlaylistPlaying = false;
+            resetAllCardStatuses();
+        }
+
+        // Stop whatever is playing
+        function stopCurrentAudio() {
+            if (activeAudio) {
+                activeAudio.pause();
+                activeAudio.currentTime = 0;
+            }
+        }
+
+        // Reset status displays of all cards
+        function resetAllCardStatuses() {
+            presets.forEach(p => {
+                document.getElementById(`status-${p}`).innerText = '閒置中';
+                document.getElementById(`play-icon-${p}`).innerHTML = '<path d="M8 5v14l11-7z"/>';
+                document.getElementById(`card-${p}`).style.borderColor = 'rgba(255, 255, 255, 0.08)';
+            });
+        }
+
+        // Sequential Player (PLAY ALL) for Card Presets
+        function togglePlayAll(preset) {
+            if (isPlaylistPlaying && activePresetCard === preset) {
+                isPlaylistPlaying = false;
+                stopCurrentAudio();
+                resetAllCardStatuses();
+                return;
+            }
+
+            stopCurrentAudio();
+            resetAllCardStatuses();
+            
+            isPlaylistPlaying = true;
+            activePresetCard = preset;
+            currentPlayIndex = 0;
+            
+            const colors = {
+                balanced: 'var(--color-balanced)', classic: 'var(--color-classic)',
+                soft: 'var(--color-soft)', crisp: 'var(--color-crisp)',
+                blue: 'var(--color-blue)', retro: 'var(--color-retro)'
+            };
+            document.getElementById(`card-${preset}`).style.borderColor = colors[preset];
+            document.getElementById(`play-icon-${preset}`).innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+
+            playNextSeq();
+        }
+
+        function playNextSeq() {
+            if (!isPlaylistPlaying || currentPlayIndex >= audioFiles.length) {
+                isPlaylistPlaying = false;
+                resetAllCardStatuses();
+                return;
+            }
+
+            const fileName = audioFiles[currentPlayIndex];
+            const preset = activePresetCard;
+            
+            document.getElementById(`status-${preset}`).innerHTML = `播放中: <span style="font-family: monospace; font-weight: 600;">${fileName}</span>`;
+
+            const audio = getAudio(preset, fileName);
+            activeAudio = audio;
+            audio.currentTime = 0;
+            
+            highlightVirtualKeyForFile(fileName);
+
+            audio.play().then(() => {
+                audio.onended = () => {
+                    currentPlayIndex++;
+                    playNextSeq();
+                };
+            }).catch(err => {
+                console.error("Audio playback error:", err);
+                currentPlayIndex++;
+                playNextSeq();
+            });
+        }
+
+        function highlightVirtualKeyForFile(fileName) {
+            let keyId = '';
+            if (fileName === 'space.wav') keyId = 'key-Space';
+            else if (fileName === 'enter.wav') keyId = 'key-Enter';
+            else if (fileName === 'backspace.wav') keyId = 'key-Backspace';
+            else if (fileName === 'delete.wav') keyId = 'key-Backspace';
+            else if (fileName.endsWith('.wav')) {
+                const num = fileName.replace('.wav', '');
+                if (!isNaN(num)) {
+                    keyId = `key-Digit${num}`;
+                }
+            }
+
+            if (keyId) {
+                const el = document.getElementById(keyId);
+                if (el) {
+                    el.classList.add('active');
+                    setTimeout(() => el.classList.remove('active'), 250);
+                }
+            }
+        }
+
+        // Play individual key sound in simulator (with Custom Mix support!)
+        function playKeySound(keyType) {
+            let file = '';
+            if (keyType === 'space') {
+                file = 'space.wav';
+            } else if (keyType === 'enter') {
+                file = 'enter.wav';
+            } else if (keyType === 'backspace') {
+                file = 'backspace.wav';
+            } else if (keyType === 'delete') {
+                file = 'delete.wav';
+            } else {
+                const rand = Math.floor(Math.random() * 10);
+                file = `${rand}.wav`;
+            }
+
+            // Look up preset: if preset is 'custom', fetch from customMix map!
+            const presetSource = (activePreset === 'custom') ? customMix[file] : activePreset;
+
+            const audio = getAudio(presetSource, file);
+            const playInstance = audio.cloneNode();
+            playInstance.volume = 0.82;
+            playInstance.play().catch(e => console.log(e));
+        }
+
+        // Key down/up logic
+        function handleKeyDown(e) {
+            let keyId = `key-${e.code}`;
+            if (e.code === 'Space') keyId = 'key-Space';
+            else if (e.code === 'Enter') keyId = 'key-Enter';
+            else if (e.code === 'Backspace') keyId = 'key-Backspace';
+
+            const keyEl = document.getElementById(keyId);
+            if (keyEl) keyEl.classList.add('active');
+
+            if (e.repeat) return;
+            
+            if (e.code === 'Space') playKeySound('space');
+            else if (e.code === 'Enter') playKeySound('enter');
+            else if (e.code === 'Backspace') playKeySound('backspace');
+            else if (e.code === 'Delete') playKeySound('delete');
+            else playKeySound('key');
+        }
+
+        function handleKeyUp(e) {
+            let keyId = `key-${e.code}`;
+            if (e.code === 'Space') keyId = 'key-Space';
+            else if (e.code === 'Enter') keyId = 'key-Enter';
+            else if (e.code === 'Backspace') keyId = 'key-Backspace';
+
+            const keyEl = document.getElementById(keyId);
+            if (keyEl) keyEl.classList.remove('active');
+        }
+
+        // Add mouse support to virtual keys
+        document.querySelectorAll('.key').forEach(keyEl => {
+            keyEl.addEventListener('mousedown', () => {
+                keyEl.classList.add('active');
+                
+                const id = keyEl.id;
+                if (id === 'key-Space') playKeySound('space');
+                else if (id === 'key-Enter') playKeySound('enter');
+                else if (id === 'key-Backspace') playKeySound('backspace');
+                else playKeySound('key');
+            });
+            keyEl.addEventListener('mouseup', () => keyEl.classList.remove('active'));
+            keyEl.addEventListener('mouseleave', () => keyEl.classList.remove('active'));
+        });
+
+        // Automatic Ghost Typing Demo
+        function runGhostTypingDemo() {
+            const textarea = document.getElementById('typing-textarea');
+            textarea.focus();
+            textarea.value = '';
+            
+            const demoText = "The quick brown fox jumps over the lazy dog. ↵";
+            let index = 0;
+
+            function typeChar() {
+                if (index >= demoText.length) return;
+
+                const char = demoText[index];
+                let keyCode = '';
+                
+                if (char === ' ') {
+                    textarea.value += ' ';
+                    playKeySound('space');
+                    keyCode = 'Space';
+                } else if (char === '↵') {
+                    textarea.value += '\n';
+                    playKeySound('enter');
+                    keyCode = 'Enter';
+                } else {
+                    textarea.value += char;
+                    playKeySound('key');
+                    const upper = char.toUpperCase();
+                    if (/[A-Z]/.test(upper)) {
+                        keyCode = `Key${upper}`;
+                    } else if (/[0-9]/.test(upper)) {
+                        keyCode = `Digit${upper}`;
+                    }
+                }
+
+                if (keyCode) {
+                    const el = document.getElementById(`key-${keyCode}`);
+                    if (el) {
+                        el.classList.add('active');
+                        setTimeout(() => el.classList.remove('active'), 100);
+                    }
+                }
+
+                index++;
+                setTimeout(typeChar, 100 + Math.random() * 150);
+            }
+
+            typeChar();
+        }
+
+        // JSZip: Pack & Download ZIP sound pack
+        async function downloadCustomZip() {
+            const statusEl = document.getElementById('zip-status');
+            statusEl.style.color = '#fff';
+            statusEl.innerText = '正在打包打包中...';
+
+            try {
+                const zip = new JSZip();
+                
+                for (const fileName of audioFiles) {
+                    const preset = customMix[fileName];
+                    const fileUrl = `wavs/${preset}/${fileName}`;
+                    
+                    // Fetch WAV file blob
+                    const response = await fetch(fileUrl);
+                    if (!response.ok) {
+                        throw new Error(`無法讀取 ${fileUrl}`);
+                    }
+                    const blob = await response.blob();
+                    zip.file(fileName, blob);
+                }
+
+                // Generate ZIP
+                const content = await zip.generateAsync({ type: 'blob' });
+                
+                // Trigger download
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(content);
+                link.download = 'custom_keyboard_sounds.zip';
+                link.click();
+                
+                statusEl.style.color = 'var(--color-custom)';
+                statusEl.innerText = '打包完成，已開始下載！';
+                setTimeout(() => statusEl.innerText = '', 3000);
+            } catch (err) {
+                console.error("ZIP Generation error:", err);
+                statusEl.style.color = 'var(--color-blue)';
+                statusEl.innerHTML = `打包失敗 (CORS限制，請點右下角按鈕單檔下載，或以本地伺服器執行)`;
+            }
+        }
+
+        // Initialize grid on load
+        window.onload = () => {
+            initMixerGrid();
+        };
+    </script>
+</body>
+</html>
