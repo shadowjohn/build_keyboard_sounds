@@ -17,7 +17,7 @@
 cargo run --release -- --out .\wavs --preset classic --volume 82
 ```
 
-批量產生所有音效套件（推薦，全部由演算法合成，分別存在 `wavs/classic/`, `wavs/soft/`, `wavs/crisp/`, `wavs/blue/`, `wavs/retro/`, `wavs/balanced/`, `wavs/csharp/`）：
+批量產生所有音效套件（推薦，全部由演算法合成，分別存在 `wavs/classic/`, `wavs/soft/`, `wavs/crisp/`, `wavs/blue/`, `wavs/retro/`, `wavs/balanced/`, `wavs/csharp/`, `wavs/nostalgia/`）：
 
 ```powershell
 cargo run --release -- --preset all --volume 82
@@ -29,11 +29,12 @@ cargo run --release -- --preset all --volume 82
 | --- | --- |
 | `soft` | 7 點低通濾波且降調 10% (0.9x 速度)，極度低沉、安靜的 Thock 靜音線性軸感 |
 | `classic` | 微調的高頻瞬態邊緣增強版經典鍵音，乾淨清脆 |
-| `crisp` | 大幅升調 15% (1.15x 速度) 並過濾低音，輕快高頻，猶如 Kailh Box 白軸冰裂感 |
+| `crisp` | 大幅升調 15% (1.15x 速度) 並過濾低音，輕快高頻，猶如清脆段落白軸冰裂感 |
 | `blue` | 升調 5% (1.05x 速度) 且在起音處融合一組清脆的機械 click jacket 雙重卡榫聲與金屬彈簧餘音，擬真青軸 |
 | `retro` | 厚重老打字機鐵錘 clack，搭配下滑退格掃擊音與 Enter 回車鈴聲 |
 | `balanced` | 較長尾韻的大鍵回饋與均衡擊鍵音，適合想保留傳統打字感的設定 |
 | `csharp` | 仿早期 C# 版產生器的柔順短鍵感，Enter 短促乾淨、一般鍵長短交錯 |
+| `nostalgia` | 復古通訊感的電子 tick 與長尾 Enter，退格刪除較柔和 |
 | `all` | 同時輸出上述所有 Preset 到個別子資料夾中 |
 
 單獨產生極擬真青軸的版本：
@@ -46,6 +47,12 @@ cargo run --release -- --out .\wavs --preset blue --volume 76
 
 ```powershell
 cargo run --release -- --out .\wavs --preset retro --volume 82
+```
+
+單獨產生復古通訊版本：
+
+```powershell
+cargo run --release -- --out .\wavs --preset nostalgia --volume 82
 ```
 
 若你有自己錄製且可授權使用的鍵盤聲，可用 `--trace-from` 做私有調音：

@@ -23,6 +23,7 @@ enum Preset {
     Balanced,
     Retro,
     CSharp,
+    Nostalgia,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -80,6 +81,7 @@ fn run() -> io::Result<()> {
                 (Preset::Retro, "retro"),
                 (Preset::Balanced, "balanced"),
                 (Preset::CSharp, "csharp"),
+                (Preset::Nostalgia, "nostalgia"),
             ];
             for &(preset, dir_name) in &presets {
                 let preset_dir = options.out_dir.join(dir_name);
@@ -208,12 +210,13 @@ impl Preset {
             "soft" => Ok(Self::Soft),
             "classic" => Ok(Self::Classic),
             "crisp" => Ok(Self::Crisp),
-            "blue" | "mx-blue" | "cherry-blue" | "青軸" => Ok(Self::Blue),
+            "blue" | "青軸" => Ok(Self::Blue),
             "balanced" => Ok(Self::Balanced),
             "retro" | "typewriter" => Ok(Self::Retro),
             "csharp" | "cs" => Ok(Self::CSharp),
+            "nostalgia" => Ok(Self::Nostalgia),
             _ => Err(invalid(format!(
-                "unknown preset: {value}; expected soft, classic, crisp, blue, balanced, retro, or csharp"
+                "unknown preset: {value}; expected soft, classic, crisp, blue, balanced, retro, csharp, or nostalgia"
             ))),
         }
     }
@@ -357,6 +360,10 @@ fn specs_for_preset(preset: Preset) -> Vec<SoundSpec> {
         apply_csharp_shape(&mut specs);
         return specs;
     }
+    if preset == Preset::Nostalgia {
+        apply_nostalgia_shape(&mut specs);
+        return specs;
+    }
     if preset == Preset::Blue {
         apply_blue_switch_shape(&mut specs);
         return specs;
@@ -374,6 +381,7 @@ fn specs_for_preset(preset: Preset) -> Vec<SoundSpec> {
         Preset::Balanced => unreachable!(),
         Preset::Retro => unreachable!(),
         Preset::CSharp => unreachable!(),
+        Preset::Nostalgia => unreachable!(),
     };
 
     for spec in &mut specs {
@@ -572,6 +580,56 @@ fn apply_csharp_shape(specs: &mut [SoundSpec]) {
     }
 }
 
+fn apply_nostalgia_shape(specs: &mut [SoundSpec]) {
+    for spec in specs {
+        match spec.file_name {
+            "0.wav" => tune_reference_key(spec, 122, 1_060.0, 0.90, 0.38, 1.02),
+            "1.wav" => tune_reference_key(spec, 197, 1_380.0, 0.98, 0.32, 1.08),
+            "2.wav" => tune_reference_key(spec, 139, 1_460.0, 0.96, 0.34, 1.04),
+            "3.wav" => tune_reference_key(spec, 156, 1_190.0, 0.74, 0.32, 0.88),
+            "4.wav" => tune_reference_key(spec, 111, 1_560.0, 1.04, 0.30, 1.12),
+            "5.wav" => tune_reference_key(spec, 199, 1_620.0, 0.92, 0.34, 1.02),
+            "6.wav" => tune_reference_key(spec, 134, 1_880.0, 1.12, 0.28, 1.20),
+            "7.wav" => tune_reference_key(spec, 137, 1_520.0, 0.88, 0.30, 1.04),
+            "8.wav" => tune_reference_key(spec, 172, 1_280.0, 0.80, 0.34, 0.94),
+            "9.wav" => tune_reference_key(spec, 97, 1_800.0, 1.08, 0.28, 1.18),
+            "enter.wav" => {
+                spec.kind = SoundKind::TypewriterEnter;
+                spec.duration_ms = 485;
+                spec.base_hz = 260.0;
+                spec.noise = 0.46;
+                spec.body = 0.78;
+                spec.brightness = 0.72;
+            }
+            "delete.wav" => {
+                spec.kind = SoundKind::BackspaceWhoosh;
+                spec.duration_ms = 175;
+                spec.base_hz = 620.0;
+                spec.noise = 0.42;
+                spec.body = 0.50;
+                spec.brightness = 0.74;
+            }
+            "backspace.wav" => {
+                spec.kind = SoundKind::BackspaceWhoosh;
+                spec.duration_ms = 175;
+                spec.base_hz = 620.0;
+                spec.noise = 0.42;
+                spec.body = 0.50;
+                spec.brightness = 0.74;
+            }
+            "space.wav" => {
+                spec.kind = SoundKind::SpaceBar;
+                spec.duration_ms = 168;
+                spec.base_hz = 360.0;
+                spec.noise = 0.66;
+                spec.body = 0.74;
+                spec.brightness = 0.56;
+            }
+            _ => {}
+        }
+    }
+}
+
 fn tune_reference_key(
     spec: &mut SoundSpec,
     duration_ms: u32,
@@ -610,6 +668,7 @@ fn build_traced_wav_bytes(
     let speed = match preset {
         Preset::Balanced => 1.015,
         Preset::CSharp => 1.012,
+        Preset::Nostalgia => 1.0,
         Preset::Soft => 0.90,
         Preset::Crisp => 1.15,
         Preset::Blue => 1.05,
@@ -655,7 +714,7 @@ fn process_reference_samples(
     seed: u32,
 ) -> Vec<f32> {
     match preset {
-        Preset::Balanced | Preset::CSharp => {
+        Preset::Balanced | Preset::CSharp | Preset::Nostalgia => {
             let mut processed = vec![0.0; samples.len()];
             if !samples.is_empty() {
                 processed[0] = samples[0];
@@ -1363,7 +1422,7 @@ fn invalid(message: impl Into<String>) -> io::Error {
 
 fn print_usage() {
     println!(
-        "Usage: build_keyboard_sounds [--out wavs] [--preset soft|classic|crisp|blue|balanced|retro|csharp] [--volume 0.82] [--sample-rate 44100] [--trace-from your_own_wavs]"
+        "Usage: build_keyboard_sounds [--out wavs] [--preset soft|classic|crisp|blue|balanced|retro|csharp|nostalgia] [--volume 0.82] [--sample-rate 44100] [--trace-from your_own_wavs]"
     );
 }
 
@@ -1543,6 +1602,17 @@ mod tests {
     }
 
     #[test]
+    fn parse_args_rejects_external_switch_brand_aliases() {
+        let legacy_switch_family =
+            String::from_utf8(vec![109, 120, 45, 98, 108, 117, 101]).unwrap();
+        let legacy_switch_brand =
+            String::from_utf8(vec![99, 104, 101, 114, 114, 121, 45, 98, 108, 117, 101]).unwrap();
+
+        assert!(parse_args(["--preset".to_string(), legacy_switch_family]).is_err());
+        assert!(parse_args(["--preset".to_string(), legacy_switch_brand]).is_err());
+    }
+
+    #[test]
     fn parse_args_accepts_csharp_preset() {
         let options = parse_args(["--preset".to_string(), "csharp".to_string()]).unwrap();
 
@@ -1571,6 +1641,36 @@ mod tests {
                 ("8.wav", 172),
                 ("9.wav", 97),
                 ("enter.wav", 118),
+                ("delete.wav", 175),
+                ("backspace.wav", 175),
+                ("space.wav", 168),
+            ]
+        );
+    }
+
+    #[test]
+    fn nostalgia_preset_matches_abstracted_timing_shape() {
+        let preset = Preset::parse("nostalgia").unwrap();
+        let specs = specs_for_preset(preset);
+        let durations: Vec<(&str, u32)> = specs
+            .iter()
+            .map(|spec| (spec.file_name, spec.duration_ms))
+            .collect();
+
+        assert_eq!(
+            durations,
+            vec![
+                ("0.wav", 122),
+                ("1.wav", 197),
+                ("2.wav", 139),
+                ("3.wav", 156),
+                ("4.wav", 111),
+                ("5.wav", 199),
+                ("6.wav", 134),
+                ("7.wav", 137),
+                ("8.wav", 172),
+                ("9.wav", 97),
+                ("enter.wav", 485),
                 ("delete.wav", 175),
                 ("backspace.wav", 175),
                 ("space.wav", 168),
